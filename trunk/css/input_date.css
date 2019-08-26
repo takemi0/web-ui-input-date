@@ -1,0 +1,17 @@
+.ui-datepicker-trigger{
+	margin-left: -3px;
+	margin-top: -3px;
+	vertical-align: middle;
+	height: 18px;
+}
+
+.ui-datepicker select.ui-datepicker-year {
+	width:70px;
+	background-color : transparent;
+	border: none;
+}
+.ui-datepicker select.ui-datepicker-month{
+	width:60px;
+	background-color : transparent;
+	border: none;
+}

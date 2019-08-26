@@ -16,13 +16,17 @@ var component_input_date = {
 		  */
 		 ButtonCalendar : String,
 		 /**
+		  * カレンダーボタンのアイコン画像を指定
+		  */
+		 ButtonCalendarIcon : String,
+		 /**
 		  * 今日ボタンの表示フラグ:true or false
 		  */
 		 ButtonToday : String,
 		 /**
 		  * 曜日の表示フラグ:true or false
 		  */
-		 Week :String,
+		 isWeek :String,
 		 /**
 		  * 選択範囲の最小日付
 		  */
@@ -77,7 +81,7 @@ var component_input_date = {
 	 '<select v-bind:name="input_date_name" v-model="date.date" style="text-align:right;"><option v-for="node in select_date" v-bind:value="node.value">{{node.text}}</option></select> 日 ' +
 	 '<span v-if="visibleWeek">({{this.week}})&nbsp;</span>' +
 	 '<button v-if="visibleButtonToday" v-on:click="setToday">今日</button>&nbsp;' +
-	 '<span v-if="visibleButtonCalendar" ><input v-on:change="setCalDate" class="datepicker" v-bind:id="input_calendar_name" v-bind:name="input_calendar_name" style="display:none;border:none;" disabled></span>' +
+	 '<span v-if="visibleButtonCalendar" ><input v-on:change="setCalDate" class="datepicker" v-bind:id="input_calendar_name" v-bind:name="input_calendar_name" style="width:0px;border:none;" disabled></span>' +
 	 '</span>',
 	methods : {
 		setToday : function(){
@@ -232,7 +236,9 @@ var component_input_date = {
 		if( !this.value ) this.setToday();
 		else {
 			var tmp = null;
-			if( typeof this.value == 'object' )  var tmp = this.value;
+			if( typeof this.value == 'object' )  {
+				var tmp = this.value;
+			}
 			else tmp = new Date(this.value);
 			this.date.year = tmp.getFullYear();
 			this.date.month = tmp.getMonth() + 1;
@@ -245,24 +251,43 @@ var component_input_date = {
 		this.setName( this.input_name );
 		if( this.ButtonCalendar == "true" ) this.visibleButtonCalendar = true;
 		if( this.ButtonToday == "true") this.visibleButtonToday = true;
-		if( this.Week == "true") this.visibleWeek = true;
+		if( this.isWeek == "true") this.visibleWeek = true;
 	},
 	mounted : function() {
 		//datepickerを有効にする
-		$('input[id='+this.input_calendar_name+']').datepicker({
+		var trg = $('input[id='+this.input_calendar_name+']');
+		var me = this;
+		trg.datepicker({
 			changeYear : true,
 			changeMonth : true,
-			showButtonPanel : true,
-			showOn : "button"
+			showOn : "button",
 		});
+		//最小日付の設定
 		if( this.minDate ){
-			$('input[id='+this.input_calendar_name+']').datepicker('option', 'minDate', this.minDate );
+			trg.datepicker('option', 'minDate', this.minDate );
 		}
+		//最大日付の設定
 		if( this.maxDate ){
-			$('input[id='+this.input_calendar_name+']').datepicker('option', 'maxDate', this.maxDate );
+			trg.datepicker('option', 'maxDate', this.maxDate );
 		}
-		var me = this;
-		$('input[id='+this.input_calendar_name+']').change( function(event){
+		//カレンダーアイコンの設定
+		if( this.ButtonCalendarIcon ){
+			trg.datepicker('option', 'buttonImage', this.ButtonCalendarIcon );
+			trg.datepicker('option', 'buttonImageOnly', true );
+		}
+		if( this.ButtonToday ){
+			trg.datepicker('option', 'showButtonPanel', true );
+			$.datepicker._gotoToday = function(id){
+				var target = $(id);
+				var date = new Date();
+				target.val( date.getFullYear() + '/' + (date.getMonth()+1) +'/' + date.getDate() );
+				me.date.year = date.getFullYear();
+				me.date.month = date.getMonth() + 1;
+				me.date.date = date.getDate();
+				this._hideDatepicker();
+			}
+		}
+		trg.change( function(event){
 			var tmp = $(event.currentTarget).val();
 			var tmp = tmp.split('/');
 			me.date.year = tmp[0] * 1;

@@ -5,6 +5,8 @@
 		<title>日付入力比較2</title>
 		<!-- カレンダー(jQuery DatePicker)のデザインCSS -->
 		<link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/jqueryui/1/themes/ui-lightness/jquery-ui.css">
+		<!-- カレンダーの表示調整 -->
+		<link rel="stylesheet" href="/css/input_date.css">
 	</head>
 	<body>
 		<div id="app_vue">
@@ -16,9 +18,9 @@
 					<textarea style="width:80%"> <input_date input_name="my_input_date" v-model="date1"></input_date> </textarea>
 				</li>
 				<li> 2 : セレクトボックス＋カレンダーボタン　　　　　　：
-					<input_date input_name="my2_input_date" v-model="date2" button-calendar=true></input_date><br/>
+					<input_date input_name="my2_input_date" v-model="date2" button-calendar="true"></input_date><br/>
 					値：{{date2}}<br/>
-					<textarea style="width:80%"> <input_date input_name="my2_input_date" v-model="date2" button-calendar=true></input_date> </textarea>
+					<textarea style="width:80%"> <input_date input_name="my2_input_date" v-model="date2" button-calendar="true"></input_date> </textarea>
 				</li>
 				<li> 3 : セレクトボックス＋今日ボタン　　　　　　　　　：
 					<input_date input_name="my3_input_date" v-model="date3" button-today=true></input_date><br/>
@@ -26,18 +28,21 @@
 					<textarea style="width:80%"> <input_date input_name="my3_input_date" v-model="date3" button-today=true></input_date> </textarea>
 				</li>
 				<li> 4 : セレクトボックス＋カレンダーボタン＋今日ボタン：
-					<input_date input_name="my4_input_date" v-model="date4" button-calendar=true button-today=true week="true"></input_date><br/>
+					<input_date input_name="my4_input_date" v-model="date4" button-calendar="true" button-today="true" is-week="true" button-calendar-icon="/img/icon_calender.png"></input_date><br/>
 					値：{{date4}}<br/>
-					<textarea style="width:80%"> <input_date input_name="my4_input_date" v-model="date4" button-calendar=true button-today=true week="true"></input_date><br/> </textarea>
+					<textarea style="width:80%"> <input_date input_name="my4_input_date" v-model="date4" button-calendar=true button-today=true week="true" button-calendar-icon="/img/icon_calender_tym.png"></input_date><br/> </textarea>
+					<p>※カレンダーボタンのアイコン設定可能。<br/>
+						※今日ボタン＋カレンダーボタンの組合せの時にカレンダーにも今日ボタンが表示されるようになりました。
+					</p>
 				</li>
 				<li> 5 : 動的な値指定、制限あり　　　　　　　　　　　　：
-					<input_date input_name="my5_input_date" v-model="date5" button-calendar=true min="2019/2/1" max="2019/11/15"></input_date><br/>
+					<input_date input_name="my5_input_date" v-model="date5" button-calendar=true min="2019/2/1" max="2019/11/15" button-calendar-icon="/img/icon_calender.png"></input_date><br/>
 					値：{{date5}}<br/>
-					<textarea style="width:80%"> <input_date input_name="my5_input_date" v-model="date5" button-calendar=true min="2019/2/1" max="2019/11/15"></input_date> </textarea>
+					<textarea style="width:80%"> <input_date input_name="my5_input_date" v-model="date5" button-calendar="true" min="2019/2/1" max="2019/11/15" button-calendar-icon="/img/icon_calender_tym.png"></input_date> </textarea>
 				</li>
 				<li> 6 : 静的な初期値指定　　　　　　　　　　　　　　　：
-					<input_date input_name="my5_input_date" button-calendar=true min="2016/2/1" max="2019/11/15" value="2018/1/1"></input_date><br/>
-					<textarea style="width:80%"> <input_date input_name="my5_input_date" button-calendar=true min="2016/2/1" max="2019/11/15" value="2018/1/1"></input_date> </textarea>
+					<input_date input_name="my6_input_date" button-calendar=true min="2016/2/1" max="2019/11/15" value="2018/1/1" button-calendar-icon="/img/icon_calender.png"></input_date><br/>
+					<textarea style="width:80%"> <input_date input_name="my6_input_date" button-calendar="true" min="2016/2/1" max="2019/11/15" value="2018/1/1" button-calendar-icon="/img/icon_calender_tym.png"></input_date> </textarea>
 					<br/>&nbsp;
 				</li>
 			</ul>
