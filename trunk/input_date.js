@@ -1,6 +1,7 @@
 /**
  * 日付入力コンポーネント
  */
+
 var component_input_date = {
 	/**
 	 * IF変数
@@ -11,30 +12,41 @@ var component_input_date = {
 		 * HTMLのINPUT名
 		 */
 		input_name : String,
-		 /**
-		  * カレンダーボタンの表示フラグ: ture or false
-		  */
-		 ButtonCalendar : String,
-		 /**
+
+		/**
+		 * カレンダーボタンの表示フラグ: ture or false
+		*/
+		ButtonCalendar : String,
+
+		/**
 		  * カレンダーボタンのアイコン画像を指定
-		  */
-		 ButtonCalendarIcon : String,
-		 /**
+		 */
+		ButtonCalendarIcon : String,
+
+		/**
 		  * 今日ボタンの表示フラグ:true or false
 		  */
-		 ButtonToday : String,
-		 /**
-		  * 曜日の表示フラグ:true or false
-		  */
-		 isWeek :String,
-		 /**
-		  * 選択範囲の最小日付
-		  */
-		 min : String,
-		 /**
-		  * 選択範囲の最大日付
-		  */
+		ButtonToday : String,
+
+		/**
+		 * 曜日の表示フラグ:true or false
+		 */
+		isWeek :String,
+
+		/**
+		 * 選択範囲の最小日付
+		 */
+		min : String,
+
+		/**
+		 * 選択範囲の最大日付
+		 */
 		 max : String,
+
+		/**
+		 * 確認表示用
+		 */
+		confirm : String,
 	},
 	/**
 	 * 内部変数
@@ -42,6 +54,7 @@ var component_input_date = {
 	data : function(){
 		return {
 			__name : "input_date",
+			visibleConfirm : false,
 			visibleButtonToday : false,
 			visibleButtonCalendar : false,
 			visibleWeek : false,
@@ -71,10 +84,13 @@ var component_input_date = {
 			input_calendar_name: "input_date_calendar",
 			minDate : null,
 			maxDate : null,
+			on_change :null,
 		};
 	},
 	template :
 	 '<span>' +
+	 '<span v-if="visibleConfirm">{{cal_val}}</span>' + 
+	 '<span v-else>' + 
 	 '<input type="hidden" v-bind:name="input_name" v-model="cal_val"/>' +
 	 '<select v-bind:name="input_year_name" v-model="date.year" style="text-align:right;"><option v-for="node in select_year" v-bind:value="node.value">{{node.text}}</option></select> 年 ' +
 	 '<select v-bind:name="input_month_name" v-model="date.month" style="text-align:right;"><option v-for="node in select_month" v-bind:value="node.value">{{node.text}}</option></select> 月 ' +
@@ -82,6 +98,7 @@ var component_input_date = {
 	 '<span v-if="visibleWeek">({{this.week}})&nbsp;</span>' +
 	 '<button v-if="visibleButtonToday" v-on:click="setToday">今日</button>&nbsp;' +
 	 '<span v-if="visibleButtonCalendar" ><input v-on:change="setCalDate" class="datepicker" v-bind:id="input_calendar_name" v-bind:name="input_calendar_name" style="width:0px;border:none;" disabled></span>' +
+	 '</span>'+
 	 '</span>',
 	methods : {
 		setToday : function(){
@@ -205,12 +222,25 @@ var component_input_date = {
 		},
 		cal_val : function( val ){
 			this.$emit('input', val );
+			if( this.on_change ){
+				this.on_change( val );
+			}
+		},
+		minDate : function(val){
+			this.makeYearItem( this.date.year );
+			this.makeMonthItem( this.date.year, this.date.month );
+			$('input[id='+this.input_calendar_name+']').datepicker('option', 'minDate', new Date(val) );
 		},
 		min : function(val) {
 			this.minDate = new Date(val);
 			this.makeYearItem( this.date.year );
 			this.makeMonthItem( this.date.year, this.date.month );
 			$('input[id='+this.input_calendar_name+']').datepicker('option', 'minDate', new Date(val) );
+		},
+		maxDate : function(val){
+			this.makeYearItem( this.date.year );
+			this.makeMonthItem( this.date.year, this.date.month );
+			$('input[id='+this.input_calendar_name+']').datepicker('option', 'maxDate', new Date(val) );
 		},
 		max : function(val) {
 			this.maxDate = new Date(val);
@@ -233,25 +263,32 @@ var component_input_date = {
 			this.maxDate = new Date( this.max );
 		}
 
-		if( !this.value ) this.setToday();
-		else {
+		if( this.confirm && this.confirm == "true" ) {
+			this.visibleConfirm = true;
+		}
+
+		if( !this.value ) {
+			this.setToday();
+		} else {
 			var tmp = null;
 			if( typeof this.value == 'object' )  {
 				var tmp = this.value;
 			}
 			else tmp = new Date(this.value);
+
 			this.date.year = tmp.getFullYear();
 			this.date.month = tmp.getMonth() + 1;
 			this.date.date = tmp.getDate();
 		}
+
 		this.makeYearItem( this.date.year );
 		this.makeMonthItem( this.date.year, this.date.month );
 		this.makeDateItem( this.date.year, this.date.month );
 
 		this.setName( this.input_name );
-		if( this.ButtonCalendar == "true" ) this.visibleButtonCalendar = true;
-		if( this.ButtonToday == "true") this.visibleButtonToday = true;
-		if( this.isWeek == "true") this.visibleWeek = true;
+		if( this.ButtonCalendar && this.ButtonCalendar == "true" ) this.visibleButtonCalendar = true;
+		if( this.ButtonToday && this.ButtonToday == "true") this.visibleButtonToday = true;
+		if( this.isWeek && this.isWeek == "true") this.visibleWeek = true;
 	},
 	mounted : function() {
 		//datepickerを有効にする
