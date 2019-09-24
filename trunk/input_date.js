@@ -7,7 +7,7 @@ var component_input_date = {
 	 * IF変数
 	 */
 	props : {
-		value : String,
+		value : [ String, Date ],
 		/**
 		 * HTMLのINPUT名
 		 */
@@ -17,6 +17,11 @@ var component_input_date = {
 		 * カレンダーボタンの表示フラグ: ture or false
 		*/
 		ButtonCalendar : String,
+
+		/**
+		 * クリアボタン表示フラグ: ture or false
+		*/
+		ButtonClear : String,
 
 		/**
 		  * カレンダーボタンのアイコン画像を指定
@@ -36,12 +41,12 @@ var component_input_date = {
 		/**
 		 * 選択範囲の最小日付
 		 */
-		min : String,
+		min : [ String, Date ],
 
 		/**
 		 * 選択範囲の最大日付
 		 */
-		 max : String,
+		 max : [ String, Date ],
 
 		/**
 		 * 確認表示用
@@ -57,6 +62,7 @@ var component_input_date = {
 			visibleConfirm : false,
 			visibleButtonToday : false,
 			visibleButtonCalendar : false,
+			visibleButtonClear : false,
 			visibleWeek : false,
 			date : { year : 0 , month : 0, date : 0},
 			week : 0,
@@ -98,6 +104,7 @@ var component_input_date = {
 	 '<span v-if="visibleWeek">({{this.week}})&nbsp;</span>' +
 	 '<button v-if="visibleButtonToday" v-on:click="setToday">今日</button>&nbsp;' +
 	 '<span v-if="visibleButtonCalendar" ><input v-on:change="setCalDate" class="datepicker" v-bind:id="input_calendar_name" v-bind:name="input_calendar_name" style="width:0px;border:none;" disabled></span>' +
+	 '<span v-if="visibleButtonClear" ><button v-on:click="clearDate" >クリア</button></span>' +
 	 '</span>'+
 	 '</span>',
 	methods : {
@@ -105,6 +112,11 @@ var component_input_date = {
 			this.date.year = this.today.year;
 			this.date.month = this.today.month;
 			this.date.date = this.today.date;
+		},
+		clearDate : function() {
+			this.date.year = "";
+			this.date.month = "";
+			this.date.date = "";
 		},
 		setName : function( value ){
 			this.__name = value;
@@ -117,6 +129,10 @@ var component_input_date = {
 		setCalDate : function(){
 			console.log('change');
 			var tmp = $('input[id='+this.input_calendar_name+']').val();
+			if( tmp == "//" ) {
+				this.clearDate();
+				return;
+			}
 			tmp = tmp.split('/');
 			//this.date = { year: tmp[0], month:tmp[1], date:tmp[2] };
 			this.date.year = tmp[0];
@@ -173,6 +189,7 @@ var component_input_date = {
 
 			this.select_date = [];
 			for( var n = first; n <= last; n ++ ) this.select_date.push( { text : n, value : n } );
+			if( this.date.date == "" ) return;
 			//選択日付が年月の末日よりも大きくなる場合は、年月の末日に揃える
 			if( this.date.date > last ) this.date.date = last;
 			if( this.date.date < first ) this.date.date = first;
@@ -183,18 +200,32 @@ var component_input_date = {
 			this.setName(value);
 		},
 		'date.year' : function(val){
+			if( val == "" ) {
+				this.cal_val =  val + "/" + this.date.month + "/" + this.date.date;
+				this.makeDateItem( this.today.year, this.today.month );
+				return;
+			}
 			this.makeDateItem( val, this.date.month );
 			this.cal_val =  val + "/" + this.date.month + "/" + this.date.date;
 			$('input[id='+this.input_calendar_name+']').val(this.cal_val);
 			this.week = this.list_week[ (new Date( val, this.date.month, this.date.date)).getDay() ];
 		},
 		'date.month' : function(val){
+			if( val == "" ) {
+				this.cal_val =  this.date.year + "/" + val + "/" + this.date.date;
+				this.makeDateItem( this.today.year, this.today.month );
+				return;
+			}
 			this.makeDateItem( this.date.year, val );
 			this.cal_val =  this.date.year + "/" + val + "/" + this.date.date;
 			$('input[id='+this.input_calendar_name+']').val(this.cal_val);
 			this.week = this.list_week[ (new Date( this.date.year, val, this.date.date)).getDay() ];
 		},
 		'date.date' : function(val){
+			if( val == "" ) {
+				this.cal_val =  this.date.year + "/" + this.date.month + "/" + val;
+				return;
+			}
 			this.cal_val =  this.date.year + "/" + this.date.month + "/" + val;
 			$('input[id='+this.input_calendar_name+']').val(this.cal_val);
 			this.week = this.list_week[ (new Date( this.date.year, this.date.month, val)).getDay() ];
@@ -213,6 +244,7 @@ var component_input_date = {
 				this.visibleButtonToday = false;
 			}
 		},
+
 		Week :function(val){
 			if( val == "true" || val == true ) {
 				this.visibleWeek = true;
@@ -288,7 +320,12 @@ var component_input_date = {
 		this.setName( this.input_name );
 		if( this.ButtonCalendar && this.ButtonCalendar == "true" ) this.visibleButtonCalendar = true;
 		if( this.ButtonToday && this.ButtonToday == "true") this.visibleButtonToday = true;
+		if( this.ButtonClear && this.ButtonClear == "true") this.visibleButtonClear = true;
 		if( this.isWeek && this.isWeek == "true") this.visibleWeek = true;
+
+		if( this.visibleButtonClear ) {
+			this.clearDate();
+		}
 	},
 	mounted : function() {
 		//datepickerを有効にする
@@ -326,6 +363,12 @@ var component_input_date = {
 		}
 		trg.change( function(event){
 			var tmp = $(event.currentTarget).val();
+			if( tmp == "//" ) {
+				me.date.year= "";
+				me.date.month= "";
+				me.date.date= "";
+				return;
+			}
 			var tmp = tmp.split('/');
 			me.date.year = tmp[0] * 1;
 			me.date.month = tmp[1] *1;
